@@ -46,11 +46,40 @@ export const run = async (): Promise<void> => {
   await execa(codePath, ['--help'])
   const startServer = await Promise.race([
     new Promise((resolve) => setTimeout(() => resolve(false), timeout)),
-    execa(
-      codePath,
-      ['tunnel', '--accept-server-license-terms', 'rename', machineId],
-      {stdio: [process.stdin, process.stdout, process.stderr]}
-    ).then(() => true)
+    new Promise((resolve) => {
+      let buf = '';
+  
+      // start the process first
+      const proc = execa(
+        codePath,
+        ['tunnel', '--accept-server-license-terms', 'rename', machineId],
+        { stdio: ['pipe', 'pipe', 'pipe'] }
+      );
+  
+      // handle stdout & stderr
+      proc.stdout?.on('data', (chunk) => {
+        buf += chunk.toString();
+      });
+  
+      proc.stderr?.on('data', (chunk) => {
+        buf += chunk.toString();
+      });
+  
+      // re-output full log every 3 seconds
+      const interval = setInterval(() => {
+        console.log('--- Current Output ---');
+        console.log(buf);
+      }, 3000);
+  
+      proc.then(() => {
+        clearInterval(interval);
+        resolve(true);
+      }).catch((error) => {
+        clearInterval(interval);
+        console.error('Command failed:', error);
+        resolve(false);
+      });
+    })
   ])
 
   console.log(5)
