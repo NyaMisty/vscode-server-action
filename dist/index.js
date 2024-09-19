@@ -9749,7 +9749,7 @@ const run = async () => {
     await (0,execa__WEBPACK_IMPORTED_MODULE_1__/* .execa */ .r)(codePath, ['--help']);
     const startServer = await Promise.race([
         new Promise((resolve) => setTimeout(() => resolve(false), timeout)),
-        (0,execa__WEBPACK_IMPORTED_MODULE_1__/* .execa */ .r)(codePath, ['tunnel', '--accept-server-license-terms', 'rename', machineId]).then(() => true)
+        (0,execa__WEBPACK_IMPORTED_MODULE_1__/* .execa */ .r)(codePath, ['tunnel', '--accept-server-license-terms', 'rename', machineId], { stdio: [process.stdin, process.stdout, process.stderr] }).then(() => true)
     ]);
     console.log(5);
     if (!startServer) {
