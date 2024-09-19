@@ -2,7 +2,7 @@ import { resolve, dirname } from 'node:path'
 import { platform } from 'node:os'
 import { execa } from 'execa'
 
-import { download } from '@vscode/test-electron'
+import { download, resolveCliPathFromVSCodeExecutablePath } from '@vscode/test-electron';
 import { getInput } from '@actions/core'
 
 const nodePath = resolve(process.argv[1])
@@ -29,12 +29,14 @@ export const run = async (): Promise<void> => {
   /**
    * download latest VS Code
    */
-  const electronPath = await download({ version: 'stable' })
-  const codePath = platform() === 'darwin'
-    ? resolve(electronPath, '..', '..', 'Resources', 'app', 'bin', 'code')
-    : platform() === 'win32'
-      ? resolve(dirname(electronPath), 'bin', 'code.cmd')
-      : resolve(dirname(electronPath), 'bin', 'code')
+  const vscodePath = await download({ version: 'stable' })
+  const codePath = resolveCliPathFromVSCodeExecutablePath(vscodePath);
+
+  // const codePath = platform() === 'darwin'
+  //   ? resolve(electronPath, '..', '..', 'Resources', 'app', 'bin', 'code')
+  //   : platform() === 'win32'
+  //     ? resolve(dirname(electronPath), 'bin', 'code.cmd')
+  //     : resolve(dirname(electronPath), 'bin', 'code')
 
   /**
    * name the machine as an individual command so that we don't
